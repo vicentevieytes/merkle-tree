@@ -10,7 +10,10 @@ struct MerkleNode {
 }
 
 impl MerkleNode {
-    fn new(hash: Vec<u8>) -> Self {
+    fn new_leaf(data_block: &[u8]) -> Self {
+        let mut hasher = Sha256::new();
+        hasher.update(data_block);
+        let hash = hasher.finalize().to_vec();
         MerkleNode {
             hash,
             left: None,
@@ -30,18 +33,15 @@ impl MerkleNode {
     }
 }
 
-fn hash_data_bytes(data: &[u8]) {
+fn new_merkle_tree(data: &[u8]) {
     let mut data_vector = vec![];
     for &block in data.iter() {
-        let mut hasher = Sha256::new();
-        hasher.update(&[block]);
-        let hashed_data_block = hasher.finalize().to_vec();
-        data_vector.push(hashed_data_block);
+        data_vector.push(MerkleNode::new_leaf(&[block]));
     }
-
-    println!("{:?}", data_vector[0].len())
+    if data_vector.len() % 2 == 1 {
+        let last_element = data_vector[data_vector.len() - 1].clone();
+        data_vector.push(last_element);
+    }
 }
 
-fn main() {
-    hash_data_bytes(&[1, 2, 3, 4])
-}
+fn main() {}
