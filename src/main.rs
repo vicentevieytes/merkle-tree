@@ -33,6 +33,20 @@ impl MerkleNode {
     }
 }
 
+struct MerkleTree {
+    root: MerkleNode,
+    data: Vec<u8>,
+}
+
+impl MerkleTree {
+    fn new(data: &[u8]) -> Self {
+        MerkleTree {
+            root: new_merkle_tree(data),
+            data: data.to_vec(),
+        }
+    }
+}
+
 fn new_merkle_tree(data: &[u8]) -> MerkleNode {
     // Construct the tree one level at a time.
     // First level: constructing leaf MerkleNodes from data.
@@ -68,6 +82,6 @@ fn new_merkle_tree(data: &[u8]) -> MerkleNode {
 }
 
 fn main() {
-    let merkle_tree = new_merkle_tree(&[1, 2, 3, 4, 5]);
-    println!("{:?}", merkle_tree.hash);
+    let merkle_tree = MerkleTree::new(&[1, 2, 3, 4, 5]);
+    println!("{:?}", merkle_tree.root.hash);
 }
