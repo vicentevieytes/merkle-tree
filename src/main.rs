@@ -48,7 +48,7 @@ impl MerkleTree {
             data: data.to_vec(),
         }
     }
-
+    // Return the Root MerkleNode from data.
     fn create_from(data: &[u8]) -> MerkleNode {
         // Construct the tree one level at a time.
         // First level: constructing leaf MerkleNodes from data.
@@ -59,7 +59,7 @@ impl MerkleTree {
             current_level = Self::next_merkle_level(current_level);
         }
 
-        return current_level[0].clone();
+        current_level[0].clone()
     }
 
     // Return even length vector of leaf MerkleNodes from &[u8]
@@ -73,10 +73,10 @@ impl MerkleTree {
             let last_element = leaves[leaves.len() - 1].clone();
             leaves.push(last_element);
         }
-        return leaves;
+        leaves
     }
 
-    // From a vec<MerkleNode>, iterate stepping by two
+    // From a vec<MerkleNode>, iterate by pairs
     // and create the next level by concatenating the hashes and hashing again
     fn next_merkle_level(current_level: Vec<MerkleNode>) -> Vec<MerkleNode> {
         let mut next_level: Vec<MerkleNode> = vec![];
@@ -95,7 +95,7 @@ impl MerkleTree {
             let last_element = next_level[next_level.len() - 1].clone();
             next_level.push(last_element);
         }
-        return next_level;
+        next_level
     }
 }
 fn main() {
