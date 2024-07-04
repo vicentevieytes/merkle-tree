@@ -1,3 +1,5 @@
+![license](https://img.shields.io/github/license/vicentevieytes/merkle-tree)
+
 # merkle-tree
 Rust implementation of a Merkle Tree data structure. 
 
