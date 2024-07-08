@@ -1,4 +1,5 @@
-extern crate sha2;
+use crate::crypto::hash_combined;
+use crate::crypto::hash_value;
 
 use sha2::{Digest, Sha256};
 use std::f64;
@@ -16,10 +17,7 @@ pub struct MerkleNode {
 impl MerkleNode {
     /// Create a new instance without any children
     pub fn new_leaf(data_block: &[u8]) -> Self {
-        let mut hasher = Sha256::new();
-        hasher.update(data_block);
-        let hash = hasher.finalize().to_vec();
-
+        let hash = hash_value(data_block);
         MerkleNode {
             hash,
             left: None,
@@ -29,10 +27,7 @@ impl MerkleNode {
     /// Create a new instance from two child nodes. Store the hash of the concatenation of the two
     /// children's hashes and a reference to each child node.k
     pub fn combine(merkle_left: &MerkleNode, merkle_right: &MerkleNode) -> Self {
-        let mut hasher = Sha256::new();
-        hasher.update(&merkle_left.hash);
-        hasher.update(&merkle_right.hash);
-        let hash = hasher.finalize().to_vec();
+        let hash = hash_combined(&merkle_left.hash, &merkle_right.hash);
 
         MerkleNode {
             hash,
@@ -134,7 +129,7 @@ impl MerkleTree {
     fn merkle_proof(root_node: &MerkleNode, index: usize, tree_height: usize) -> Vec<Vec<u8>> {
         match (&root_node.left, &root_node.right) {
             (Some(left), Some(right)) => {
-                //Each level's size is a power of 2, divide the data by two each level, depending
+                //Each level's size is divided in a power of 2 and the remainder on each level, depending
                 //on which half the element we want to prove inclusion of is at we choose left or right children
                 //of the current root and add that node's sibling to the proof.
 
@@ -157,22 +152,6 @@ impl MerkleTree {
         }
     }
 
-    /// Function to verify a Merkle proof
-    pub fn verify_proof(index: usize, data: u8, proof: Vec<Vec<u8>>, root_hash: Vec<u8>) -> bool {
-        let mut computed_hash = hash_value(&[data]);
-        let mut current_index = index;
-        for sibling_hash in proof.iter() {
-            if current_index % 2 == 0 {
-                computed_hash = hash_combined(computed_hash, sibling_hash.to_vec());
-            } else {
-                computed_hash =
-                    Sha256::digest(&[sibling_hash.clone(), computed_hash].concat()).to_vec();
-            }
-            current_index /= 2;
-        }
-        computed_hash == root_hash
-    }
-
     /// Returns the height of the tree. Because it's a full binary tree, the height is calculated
     /// by applying log2 to the ammount of leaves and ceiling the result.
     pub fn get_tree_height(&self) -> usize {
@@ -180,15 +159,18 @@ impl MerkleTree {
     }
 }
 
-fn hash_combined(a: Vec<u8>, b: Vec<u8>) -> Vec<u8> {
-    let mut hasher = Sha256::new();
-    hasher.update(a);
-    hasher.update(b);
-    hasher.finalize().to_vec()
-}
-
-fn hash_value(data: &[u8]) -> Vec<u8> {
-    let mut hasher = Sha256::new();
-    hasher.update(data);
-    hasher.finalize().to_vec()
+/// Function to verify a Merkle proof
+pub fn verify_proof(index: usize, data: u8, proof: Vec<Vec<u8>>, root_hash: Vec<u8>) -> bool {
+    let mut computed_hash = hash_value(&[data]);
+    let mut current_index = index;
+    for sibling_hash in proof.iter() {
+        if current_index % 2 == 0 {
+            computed_hash = hash_combined(&computed_hash, &sibling_hash);
+        } else {
+            computed_hash =
+                Sha256::digest(&[sibling_hash.clone(), computed_hash].concat()).to_vec();
+        }
+        current_index /= 2;
+    }
+    computed_hash == root_hash
 }

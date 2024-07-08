@@ -1,3 +1,4 @@
+use merkle_tree::crypto::hash_value;
 use merkle_tree::merkle::MerkleTree;
 
 fn main() {
