@@ -62,7 +62,7 @@ impl MerkleTree {
         self.root.clone()
     }
 
-    /// Returns the Root MerkleNode from data.
+    /// Returns the Root MerkleNode of a Merkle Tree made from a &\[u8\].
     fn create_root_node_from(data: &[u8]) -> MerkleNode {
         // Construct the tree one level at a time.
         // First level: constructing leaf MerkleNodes from data.
@@ -76,7 +76,7 @@ impl MerkleTree {
         current_level[0].clone()
     }
 
-    // Return even length vector of leaf MerkleNodes from &[u8]
+    /// Return even length vector of leaf MerkleNodes from &\[u8\]
     fn create_leaves(data: &[u8]) -> Vec<MerkleNode> {
         let mut leaves: Vec<MerkleNode> = vec![];
         for &block in data.iter() {
@@ -90,8 +90,8 @@ impl MerkleTree {
         leaves
     }
 
-    // From a vec<MerkleNode>, iterate by pairs
-    // and create the next level by concatenating the hashes and hashing again
+    /// From a vec<MerkleNode>, iterate by pairs
+    /// and create the next level by concatenating the hashes and hashing again
     fn next_merkle_level(current_level: Vec<MerkleNode>) -> Vec<MerkleNode> {
         let mut next_level: Vec<MerkleNode> = vec![];
         let mut i = 0;
@@ -156,9 +156,39 @@ impl MerkleTree {
             }
         }
     }
+
+    /// Function to verify a Merkle proof
+    pub fn verify_proof(index: usize, data: u8, proof: Vec<Vec<u8>>, root_hash: Vec<u8>) -> bool {
+        let mut computed_hash = hash_value(&[data]);
+        let mut current_index = index;
+        for sibling_hash in proof.iter() {
+            if current_index % 2 == 0 {
+                computed_hash = hash_combined(computed_hash, sibling_hash.to_vec());
+            } else {
+                computed_hash =
+                    Sha256::digest(&[sibling_hash.clone(), computed_hash].concat()).to_vec();
+            }
+            current_index /= 2;
+        }
+        computed_hash == root_hash
+    }
+
     /// Returns the height of the tree. Because it's a full binary tree, the height is calculated
     /// by applying log2 to the ammount of leaves and ceiling the result.
     pub fn get_tree_height(&self) -> usize {
         (f64::from(self.data.len() as u32).log2().ceil()) as usize
     }
+}
+
+fn hash_combined(a: Vec<u8>, b: Vec<u8>) -> Vec<u8> {
+    let mut hasher = Sha256::new();
+    hasher.update(a);
+    hasher.update(b);
+    hasher.finalize().to_vec()
+}
+
+fn hash_value(data: &[u8]) -> Vec<u8> {
+    let mut hasher = Sha256::new();
+    hasher.update(data);
+    hasher.finalize().to_vec()
 }
