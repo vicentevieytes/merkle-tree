@@ -113,8 +113,8 @@ impl MerkleTree {
     /// Given a value and it's position on the data, returns the sequence of hashes
     /// which concatenated and hashed with the original value and each resultant
     /// returns the Merkle Tree's root hash.
-    pub fn inclusion_proof(&self, index: usize, value: &u8) -> Option<Vec<Vec<u8>>> {
-        if self.data.get(index) != Some(value) {
+    pub fn inclusion_proof(&self, index: usize, value: u8) -> Option<Vec<Vec<u8>>> {
+        if self.data.get(index) != Some(&value) {
             return None;
         } else {
             let tree_height = self.get_tree_height();
@@ -154,7 +154,8 @@ impl MerkleTree {
             }
         }
     }
-
+    /// Returns the height of the tree. Because it's a full binary tree, the height is calculated
+    /// by applying log2 to the ammount of leaves and ceiling the result.
     pub fn get_tree_height(&self) -> usize {
         (f64::from(self.data.len() as u32).log2().ceil()) as usize
     }
