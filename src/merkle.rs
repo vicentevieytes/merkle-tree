@@ -36,6 +36,7 @@ impl MerkleNode {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct MerkleTree {
     root: MerkleNode,
     data: Vec<u8>,
@@ -44,16 +45,16 @@ pub struct MerkleTree {
 impl MerkleTree {
     pub fn new(data: &[u8]) -> Self {
         MerkleTree {
-            root: Self::create_from(data),
+            root: Self::root_node_from(data),
             data: data.to_vec(),
         }
     }
 
     // Return the Root MerkleNode from data.
-    fn create_from(data: &[u8]) -> MerkleNode {
+    fn root_node_from(data: &[u8]) -> MerkleNode {
         // Construct the tree one level at a time.
         // First level: constructing leaf MerkleNodes from data.
-        let mut current_level = Self::get_leaves(&data);
+        let mut current_level = Self::create_leaves(&data);
 
         // Construct middle levels and finally root by combinig lower levels.
         while current_level.len() > 1 {
@@ -64,7 +65,7 @@ impl MerkleTree {
     }
 
     // Return even length vector of leaf MerkleNodes from &[u8]
-    fn get_leaves(data: &[u8]) -> Vec<MerkleNode> {
+    fn create_leaves(data: &[u8]) -> Vec<MerkleNode> {
         let mut leaves: Vec<MerkleNode> = vec![];
         for &block in data.iter() {
             leaves.push(MerkleNode::new_leaf(&[block]));
@@ -78,7 +79,6 @@ impl MerkleTree {
     }
 
     /// Returns the root node of the tree as a MerkleNode struct.
-
     pub fn get_root(&self) -> MerkleNode {
         self.root.clone()
     }
@@ -103,4 +103,7 @@ impl MerkleTree {
         }
         next_level
     }
+
+    pub fn inclusion_proof(index, value) -> :
+        
 }
