@@ -49,6 +49,7 @@ pub struct MerkleTree {
 }
 
 impl MerkleTree {
+    /// Create a new MerkleTree from a &\[u8\]
     pub fn new(data: &[u8]) -> Self {
         MerkleTree {
             root: Self::create_root_node_from(data),
@@ -56,7 +57,12 @@ impl MerkleTree {
         }
     }
 
-    // Return the Root MerkleNode from data.
+    /// Returns the root node of the tree as a MerkleNode struct.
+    pub fn get_root_node(&self) -> MerkleNode {
+        self.root.clone()
+    }
+
+    /// Returns the Root MerkleNode from data.
     fn create_root_node_from(data: &[u8]) -> MerkleNode {
         // Construct the tree one level at a time.
         // First level: constructing leaf MerkleNodes from data.
@@ -84,10 +90,6 @@ impl MerkleTree {
         leaves
     }
 
-    /// Returns the root node of the tree as a MerkleNode struct.
-    pub fn get_root_node(&self) -> MerkleNode {
-        self.root.clone()
-    }
     // From a vec<MerkleNode>, iterate by pairs
     // and create the next level by concatenating the hashes and hashing again
     fn next_merkle_level(current_level: Vec<MerkleNode>) -> Vec<MerkleNode> {
