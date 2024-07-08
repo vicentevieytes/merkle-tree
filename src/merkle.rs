@@ -175,8 +175,7 @@ pub fn verify_proof(index: usize, data: u8, proof: Vec<Vec<u8>>, root_hash: Vec<
         if current_index % 2 == 0 {
             computed_hash = hash_combined(&computed_hash, &sibling_hash);
         } else {
-            computed_hash =
-                Sha256::digest(&[sibling_hash.clone(), computed_hash].concat()).to_vec();
+            computed_hash = hash_combined(&sibling_hash, &computed_hash);
         }
         current_index /= 2;
     }
