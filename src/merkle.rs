@@ -35,6 +35,14 @@ impl MerkleNode {
             right: Some(Box::new(merkle_right.clone())),
         }
     }
+
+    pub fn get_hash(&self) -> Vec<u8> {
+        self.hash.clone()
+    }
+
+    pub fn get_hash_string(&self) -> String {
+        String::from_utf8(self.hash.clone()).expect("Invalid utf8 bytes on hash")
+    }
 }
 
 #[derive(Clone, Debug)]
