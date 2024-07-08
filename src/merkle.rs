@@ -1,7 +1,6 @@
 use crate::crypto::hash_combined;
 use crate::crypto::hash_value;
 
-use sha2::{Digest, Sha256};
 use std::f64;
 
 /// The MerkleNode data structure represents the root of a binary MerkleTree
