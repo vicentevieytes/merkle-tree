@@ -1,7 +1,11 @@
 extern crate sha2;
 
 use sha2::{Digest, Sha256};
+use std::f64;
 
+/// The MerkleNode data structure represents the root of a binary MerkleTree
+/// A MerkleNode without any children is called a "leaf".
+/// A MerkleNode is composed of it's hash value and a reference to each of it's children.
 #[derive(Clone, Debug)]
 pub struct MerkleNode {
     hash: Vec<u8>,
@@ -10,6 +14,7 @@ pub struct MerkleNode {
 }
 
 impl MerkleNode {
+    /// Create a new instance without any children
     pub fn new_leaf(data_block: &[u8]) -> Self {
         let mut hasher = Sha256::new();
         hasher.update(data_block);
@@ -21,7 +26,8 @@ impl MerkleNode {
             right: None,
         }
     }
-
+    /// Create a new instance from two child nodes. Store the hash of the concatenation of the two
+    /// children's hashes and a reference to each child node.k
     pub fn combine(merkle_left: &MerkleNode, merkle_right: &MerkleNode) -> Self {
         let mut hasher = Sha256::new();
         hasher.update(&merkle_left.hash);
@@ -36,24 +42,31 @@ impl MerkleNode {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct MerkleTree {
     root: MerkleNode,
     data: Vec<u8>,
 }
 
 impl MerkleTree {
+    /// Create a new MerkleTree from a &\[u8\]
     pub fn new(data: &[u8]) -> Self {
         MerkleTree {
-            root: Self::create_from(data),
+            root: Self::create_root_node_from(data),
             data: data.to_vec(),
         }
     }
 
-    // Return the Root MerkleNode from data.
-    fn create_from(data: &[u8]) -> MerkleNode {
+    /// Returns the root node of the tree as a MerkleNode struct.
+    pub fn get_root_node(&self) -> MerkleNode {
+        self.root.clone()
+    }
+
+    /// Returns the Root MerkleNode from data.
+    fn create_root_node_from(data: &[u8]) -> MerkleNode {
         // Construct the tree one level at a time.
         // First level: constructing leaf MerkleNodes from data.
-        let mut current_level = Self::get_leaves(&data);
+        let mut current_level = Self::create_leaves(&data);
 
         // Construct middle levels and finally root by combinig lower levels.
         while current_level.len() > 1 {
@@ -64,7 +77,7 @@ impl MerkleTree {
     }
 
     // Return even length vector of leaf MerkleNodes from &[u8]
-    fn get_leaves(data: &[u8]) -> Vec<MerkleNode> {
+    fn create_leaves(data: &[u8]) -> Vec<MerkleNode> {
         let mut leaves: Vec<MerkleNode> = vec![];
         for &block in data.iter() {
             leaves.push(MerkleNode::new_leaf(&[block]));
@@ -77,11 +90,6 @@ impl MerkleTree {
         leaves
     }
 
-    /// Returns the root node of the tree as a MerkleNode struct.
-
-    pub fn get_root(&self) -> MerkleNode {
-        self.root.clone()
-    }
     // From a vec<MerkleNode>, iterate by pairs
     // and create the next level by concatenating the hashes and hashing again
     fn next_merkle_level(current_level: Vec<MerkleNode>) -> Vec<MerkleNode> {
@@ -102,5 +110,55 @@ impl MerkleTree {
             next_level.push(last_element);
         }
         next_level
+    }
+
+    /// Given a value and it's position on the data, returns the sequence of hashes
+    /// which concatenated and hashed with the original value and each resultant
+    /// returns the Merkle Tree's root hash.
+    pub fn inclusion_proof(&self, index: usize, value: u8) -> Option<Vec<Vec<u8>>> {
+        if self.data.get(index) != Some(&value) {
+            return None;
+        } else {
+            let tree_height = self.get_tree_height();
+            return Some(Self::merkle_proof(
+                &self.get_root_node(),
+                index,
+                tree_height,
+            ));
+        }
+    }
+
+    /// Recursive helper function to generate the inclusion proof:
+    /// The proof that an element is in the tree is the proof that an element is
+    /// on one of the sub-trees + the hash of that subtree's sibling.
+    fn merkle_proof(root_node: &MerkleNode, index: usize, tree_height: usize) -> Vec<Vec<u8>> {
+        match (&root_node.left, &root_node.right) {
+            (Some(left), Some(right)) => {
+                //Each level's size is a power of 2, divide the data by two each level, depending
+                //on which half the element we want to prove inclusion of is at we choose left or right children
+                //of the current root and add that node's sibling to the proof.
+
+                //let half_size = 1 << (tree_height -1)
+                let half_size = 2_usize.pow((tree_height - 1) as u32);
+
+                if index < half_size {
+                    let mut proof = Self::merkle_proof(left, index, tree_height - 1);
+                    proof.push(right.hash.clone());
+                    return proof;
+                } else {
+                    let mut proof = Self::merkle_proof(right, index - tree_height, tree_height - 1);
+                    proof.push(left.hash.clone());
+                    return proof;
+                }
+            }
+            _ => {
+                vec![]
+            }
+        }
+    }
+    /// Returns the height of the tree. Because it's a full binary tree, the height is calculated
+    /// by applying log2 to the ammount of leaves and ceiling the result.
+    pub fn get_tree_height(&self) -> usize {
+        (f64::from(self.data.len() as u32).log2().ceil()) as usize
     }
 }
