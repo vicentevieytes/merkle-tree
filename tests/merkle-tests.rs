@@ -1,5 +1,5 @@
 use merkle_tree::crypto::*;
-use merkle_tree::merkle::*;
+use merkle_tree::merkle_tree::*;
 
 #[cfg(test)]
 mod tests {
