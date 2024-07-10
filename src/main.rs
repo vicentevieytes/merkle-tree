@@ -1,5 +1,4 @@
 use hex::encode;
-use merkle_tree::merkle_node::*;
 use merkle_tree::merkle_tree::*;
 
 fn main() {
