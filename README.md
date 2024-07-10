@@ -3,6 +3,20 @@
 # Merkle Tree
 Rust crate implementing a Merkle Tree data structure. 
 
+# Installation
+
+Add the following line to your cargo.toml:
+```rust
+[dependencies]
+merkle_tree = { git = "https://github.com/vicentevieytes/merkle-tree.git", branch = "main" }
+```
+or you can also do:
+```bash
+cargo add --git https://github.com/vicentevieytes/merkle-tree.git --branch main
+```
+
+# Merkle Tree structure.
+
 A Merkle Tree is a data strucuture which provides efficient integrity verification for some stream of data. The data is divided into N blocks and a cryptographic hash hash_N for each block is computed, these are the "leaves" of tree.
 
 Leaves are then grouped by two like this: `(leaf_0 leaf_1), (leaf_2, leaf_3) ... (leaf_N-1, leaf_N)`.

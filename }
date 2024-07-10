@@ -1,0 +1,15 @@
+use hex::encode;
+use merkle_tree::merkle_tree::*;
+
+fn main() {
+    let merkle_tree = MerkleTree::new(&["hola", "como", "estas", "bro", "pana"]);
+    println!("{}", encode(merkle_tree.get_root_node().get_hash()));
+    if let Some(proof) = merkle_tree.inclusion_proof(1, "como") {
+        println!("{:?}", proof.iter().map(|elem| encode(elem)).collect::Vec<>());
+
+        println!(
+            "{}",
+            verify_proof(1, "como", proof, merkle_tree.get_root_node().get_hash())
+        );
+    }
+}
