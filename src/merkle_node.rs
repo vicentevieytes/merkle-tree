@@ -14,7 +14,7 @@ pub struct MerkleNode {
 
 impl MerkleNode {
     /// Creates a new leaf `MerkleNode` from a data block.
-    pub fn new_leaf(data_block: &[u8]) -> Self {
+    pub fn new_leaf<T: AsRef<[u8]>>(data_block: T) -> Self {
         let hash = hash_value(data_block);
         MerkleNode {
             hash,
@@ -38,10 +38,10 @@ impl MerkleNode {
     ///
     /// This function builds the tree one level at a time, starting with the leaves
     /// and combining nodes until the root is reached.
-    pub fn root_node_from(data: &[u8]) -> MerkleNode {
+    pub fn root_node_from<T: AsRef<[u8]>>(data: &[T]) -> MerkleNode {
         // Construct the tree one level at a time.
         // First level: constructing leaf `MerkleNodes` from data.
-        let mut current_level = Self::create_leaves(&data);
+        let mut current_level = Self::create_leaves(data);
 
         // Construct middle levels and finally the root by combinig lower levels.
         while current_level.len() > 1 {
@@ -65,10 +65,10 @@ impl MerkleNode {
     }
 
     /// Creates leaf `MerkleNodes` from a slice of data.
-    fn create_leaves(data: &[u8]) -> Vec<MerkleNode> {
+    fn create_leaves<T: AsRef<[u8]>>(data: &[T]) -> Vec<MerkleNode> {
         let mut leaves: Vec<MerkleNode> = vec![];
-        for &block in data.iter() {
-            leaves.push(MerkleNode::new_leaf(&[block]));
+        for block in data.iter() {
+            leaves.push(MerkleNode::new_leaf(block));
         }
         // Leaves must be of even length
         if leaves.len() % 2 == 1 {
@@ -77,6 +77,7 @@ impl MerkleNode {
         }
         leaves
     }
+
     /// Creates the next level of `MerkleNodes` from the current level.
     ///
     /// This function iterates over pairs of nodes in the current level,

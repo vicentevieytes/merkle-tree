@@ -7,7 +7,7 @@ mod tests {
 
     #[test]
     fn test_from_even_merkle_tree() {
-        let data = &[1, 2, 3, 4];
+        let data = &[[1], [2], [3], [4]];
         let tree = MerkleTree::new(data);
 
         let left_combined = hash_combined(&hash_value(&[1]), &hash_value(&[2]));
@@ -20,7 +20,7 @@ mod tests {
 
     #[test]
     fn test_from_odd_two_level_merkle_tree() {
-        let data = &[1, 2, 3, 4, 5];
+        let data = &[[1], [2], [3], [4], [5]];
         let tree = MerkleTree::new(data);
 
         let left_combined = hash_combined(&hash_value(&[1]), &hash_value(&[2]));
@@ -37,7 +37,7 @@ mod tests {
 
     #[test]
     fn test_generate_proof_correctly() {
-        let data = &[1, 2, 3, 4, 5];
+        let data = &[[1], [2], [3], [4], [5]];
         let tree = MerkleTree::new(data);
 
         let left_combined = hash_combined(&hash_value(&[1]), &hash_value(&[2]));
@@ -48,7 +48,7 @@ mod tests {
         let level_2_right = hash_combined(&right_combined, &right_combined);
 
         //proof that the value 3 is at index 2
-        let proof = tree.inclusion_proof(2, 3);
+        let proof = tree.inclusion_proof(2, [3]);
         assert_eq!(
             proof.expect("Proof is None"),
             vec![hash_value(&[4]), left_combined, level_2_right]
@@ -57,12 +57,12 @@ mod tests {
 
     #[test]
     fn test_verify_proof_correctly() {
-        let data = &[1, 2, 3, 4, 5];
+        let data = &[[1], [2], [3], [4], [5]];
         let tree = MerkleTree::new(data);
-        let proof = tree.inclusion_proof(2, 3);
+        let proof = tree.inclusion_proof(2, [3]);
         assert!(verify_proof(
             2,
-            3,
+            [3],
             proof.expect("Proof is None"),
             tree.get_root_node().get_hash()
         ));
@@ -70,13 +70,13 @@ mod tests {
 
     #[test]
     fn test_verify_incorrect_proof_returns_false() {
-        let data = &[1, 2, 3, 4, 5];
+        let data = &[[1], [2], [3], [4], [5]];
         let tree = MerkleTree::new(data);
-        let proof = tree.inclusion_proof(2, 3);
+        let proof = tree.inclusion_proof(2, [3]);
         assert_eq!(
             verify_proof(
                 3,
-                2,
+                [2],
                 proof.expect("Proof is None"),
                 tree.get_root_node().get_hash()
             ),

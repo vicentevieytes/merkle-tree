@@ -11,15 +11,15 @@ use std::f64;
 #[derive(Clone, Debug)]
 pub struct MerkleTree {
     root: MerkleNode,
-    data: Vec<u8>,
+    data: Vec<Vec<u8>>,
 }
 
 impl MerkleTree {
     /// Create a new MerkleTree from a &\[u8\]
-    pub fn new(data: &[u8]) -> Self {
+    pub fn new<T: AsRef<[u8]>>(data: &[T]) -> Self {
         MerkleTree {
             root: MerkleNode::root_node_from(data),
-            data: data.to_vec(),
+            data: data.iter().map(|item| item.as_ref().to_vec()).collect(),
         }
     }
 
@@ -29,8 +29,8 @@ impl MerkleTree {
     }
 
     /// Given a value and it's position on the data, returns a cryptographic inclusion proof.
-    pub fn inclusion_proof(&self, index: usize, value: u8) -> Option<Vec<Hash>> {
-        if self.data.get(index) != Some(&value) {
+    pub fn inclusion_proof<T: AsRef<[u8]>>(&self, index: usize, value: T) -> Option<Vec<Hash>> {
+        if self.data.get(index) != Some(&value.as_ref().to_vec()) {
             return None;
         } else {
             let tree_height = self.get_tree_height();
@@ -96,8 +96,13 @@ impl MerkleTree {
 ///
 /// A boolean value indicating whether the proof is valid. Returns `true` if the proof is valid,
 /// `false` otherwise.
-pub fn verify_proof(index: usize, data: u8, proof: Vec<Hash>, root_hash: Hash) -> bool {
-    let mut computed_hash = hash_value(&[data]);
+pub fn verify_proof<T: AsRef<[u8]>>(
+    index: usize,
+    data: T,
+    proof: Vec<Hash>,
+    root_hash: Hash,
+) -> bool {
+    let mut computed_hash = hash_value(data);
     let mut current_index = index;
     for sibling_hash in proof.iter() {
         if current_index % 2 == 0 {
