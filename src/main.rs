@@ -1,5 +1,6 @@
 use hex::encode;
-use merkle_tree::merkle::*;
+use merkle_tree::merkle_node::*;
+use merkle_tree::merkle_tree::*;
 
 fn main() {
     let merkle_tree = MerkleTree::new(&[1, 2, 3, 4, 5]);
