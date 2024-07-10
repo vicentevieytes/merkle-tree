@@ -36,3 +36,8 @@ If we receive a data stream from a server, and the root of the Merkle Tree compu
 Given a value of data and it's position on the data, a Merkle Tree provides a way to proove that this value is in that position.
 
 By following the path from the root to the leaf, and providing the value of the hash of each sibling node utilized through that path, if you trust in the the root value of the tree you can verify the inclusion of the element by reconstructing the root. The proover could only possibly know the value of each pre-image needed to calculate every hash and finally the root hash if that data block is actually a part of the tree.
+
+![image](https://github.com/vicentevieytes/merkle-tree/assets/73846744/79244787-8286-475c-9062-4d6c0ff1fd2c)
+
+In this image, to proove the inclusion of H\_k, the proof would be \[H\_l, H\_ij, H_\mnop, H\_abcdefgh\], if the verifier obtains the root of the tree by accumulating the result of concatenating and hashing accordingly each of these values, then it can be sure of the inclusion of the data it asked for.
+
