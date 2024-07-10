@@ -1,9 +1,9 @@
 use crate::crypto::hash_combined;
 use crate::crypto::hash_value;
 
-/// The MerkleNode data structure represents the root of a binary MerkleTree
-/// A MerkleNode without any children is called a "leaf".
-/// A MerkleNode is composed of it's hash value and a reference to each of it's children.
+/// The `MerkleNode` data structure represents the root of a binary MerkleTree
+/// A `MerkleNode` without any children is called a "leaf".
+/// A `MerkleNode`  is composed of it's hash value and a reference to each of it's children.
 #[derive(Clone, Debug)]
 pub struct MerkleNode {
     hash: Vec<u8>,
@@ -12,7 +12,7 @@ pub struct MerkleNode {
 }
 
 impl MerkleNode {
-    /// Create a new instance without any children
+    /// Creates a new leaf `MerkleNode` from a data block.
     pub fn new_leaf(data_block: &[u8]) -> Self {
         let hash = hash_value(data_block);
         MerkleNode {
@@ -22,8 +22,8 @@ impl MerkleNode {
         }
     }
 
-    /// Create a new instance from two child nodes. Store the hash of the concatenation of the two
-    /// children's hashes and a reference to each child node.
+    /// Creates a new `MerkleNode` by combining two child nodes.
+
     pub fn combine(merkle_left: &MerkleNode, merkle_right: &MerkleNode) -> Self {
         let hash = hash_combined(&merkle_left.hash, &merkle_right.hash);
 
@@ -33,32 +33,37 @@ impl MerkleNode {
             right: Some(Box::new(merkle_right.clone())),
         }
     }
-    /// Returns the Root MerkleNode of a Merkle Tree made from a &\[u8\].
+    /// Constructs the root `MerkleNode` of a Merkle Tree from a slice of data.
+    ///
+    /// This function builds the tree one level at a time, starting with the leaves
+    /// and combining nodes until the root is reached.
     pub fn root_node_from(data: &[u8]) -> MerkleNode {
         // Construct the tree one level at a time.
-        // First level: constructing leaf MerkleNodes from data.
+        // First level: constructing leaf `MerkleNodes` from data.
         let mut current_level = Self::create_leaves(&data);
 
-        // Construct middle levels and finally root by combinig lower levels.
+        // Construct middle levels and finally the root by combinig lower levels.
         while current_level.len() > 1 {
             current_level = Self::next_merkle_level(current_level);
         }
 
         current_level[0].clone()
     }
+
+    /// Returns the hash value of the `MerkleNode`.
     pub fn get_hash(&self) -> Vec<u8> {
         self.hash.clone()
     }
-
+    /// Returns a reference to the right child node, if it exists.
     pub fn right(&self) -> Option<&MerkleNode> {
         self.right.as_deref()
     }
-
+    /// Returns a reference to the left child node, if it exists.
     pub fn left(&self) -> Option<&MerkleNode> {
         self.left.as_deref()
     }
 
-    /// Return even length vector of leaf MerkleNodes from &\[u8\]
+    /// Creates leaf `MerkleNodes` from a slice of data.
     fn create_leaves(data: &[u8]) -> Vec<MerkleNode> {
         let mut leaves: Vec<MerkleNode> = vec![];
         for &block in data.iter() {
@@ -71,9 +76,11 @@ impl MerkleNode {
         }
         leaves
     }
-
-    /// From a vec<MerkleNode>, iterate by pairs
-    /// and create the next level by concatenating the hashes and hashing again
+    /// Creates the next level of `MerkleNodes` from the current level.
+    ///
+    /// This function iterates over pairs of nodes in the current level,
+    /// combines them, and creates a new level of parent nodes.
+    /// If the resulting level has an odd number of nodes, it duplicates the last node.
     fn next_merkle_level(current_level: Vec<MerkleNode>) -> Vec<MerkleNode> {
         let mut next_level: Vec<MerkleNode> = vec![];
         let mut i = 0;

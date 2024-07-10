@@ -6,6 +6,7 @@ use std::f64;
 
 /// The MerkleTree data structure wraps a tree represented as a MerkleNode
 /// and also keeps a copy of the data it's constructed out of.
+/// It can provide inclusion proofs that a certain leaf exists in the tree.
 #[derive(Clone, Debug)]
 pub struct MerkleTree {
     root: MerkleNode,
@@ -75,12 +76,25 @@ impl MerkleTree {
     }
 }
 
-/// Function to verify a Merkle proof that a certain leaf has a certain value
-/// The verifier constructs the merkle path starting from the hash of the provided data,
-/// and processing each resultant by concatenating the next value of the proof and taking the hash
-/// from that concatenation.
-/// If the result at the end is the root_hash provided, then it's proof that the data exists
-/// at the provided index on the merkle tree with that root hash value.
+/// Verifies a Merkle proof that a certain leaf node has a specific value.
+///
+/// This function checks whether the provided data exists at the given index in the Merkle tree
+/// with the specified root hash. It does so by constructing the Merkle path starting from the
+/// hash of the provided data and processing each result by concatenating the next value of the
+/// proof and taking the hash from that concatenation. If the final computed hash matches the
+/// provided root hash, it proves that the data exists at the provided index in the Merkle tree.
+///
+/// # Arguments
+///
+/// * `index` - The index of the leaf node in the Merkle tree.
+/// * `data` - The value of the data at the leaf node.
+/// * `proof` - A vector of vectors of bytes representing the Merkle proof (hashes of sibling nodes).
+/// * `root_hash` - A vector of bytes representing the root hash of the Merkle tree.
+///
+/// # Returns
+///
+/// A boolean value indicating whether the proof is valid. Returns `true` if the proof is valid,
+/// `false` otherwise.
 pub fn verify_proof(index: usize, data: u8, proof: Vec<Vec<u8>>, root_hash: Vec<u8>) -> bool {
     let mut computed_hash = hash_value(&[data]);
     let mut current_index = index;
