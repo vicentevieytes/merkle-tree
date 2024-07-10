@@ -14,7 +14,7 @@ mod tests {
         let right_combined = hash_combined(&hash_value(&[3]), &hash_value(&[4]));
         assert_eq!(
             hash_combined(&left_combined, &right_combined),
-            tree.get_root_node().get_hash()
+            tree.root_hash()
         )
     }
 
@@ -31,7 +31,7 @@ mod tests {
         let level_2_right = hash_combined(&right_combined, &right_combined);
         assert_eq!(
             hash_combined(&level_2_left, &level_2_right),
-            tree.get_root_node().get_hash()
+            tree.root_hash()
         )
     }
 
@@ -64,7 +64,7 @@ mod tests {
             2,
             [3],
             proof.expect("Proof is None"),
-            tree.get_root_node().get_hash()
+            tree.root_hash()
         ));
     }
 
@@ -74,12 +74,7 @@ mod tests {
         let tree = MerkleTree::new(data);
         let proof = tree.inclusion_proof(2, [3]);
         assert_eq!(
-            verify_proof(
-                3,
-                [2],
-                proof.expect("Proof is None"),
-                tree.get_root_node().get_hash()
-            ),
+            verify_proof(3, [2], proof.expect("Proof is None"), tree.root_hash()),
             false
         );
     }
@@ -93,7 +88,7 @@ mod tests {
         let right_combined = hash_combined(&hash_value("estas"), &hash_value("bro"));
         assert_eq!(
             hash_combined(&left_combined, &right_combined),
-            tree.get_root_node().get_hash()
+            tree.root_hash()
         )
     }
 
@@ -110,7 +105,7 @@ mod tests {
         let level_2_right = hash_combined(&right_combined, &right_combined);
         assert_eq!(
             hash_combined(&level_2_left, &level_2_right),
-            tree.get_root_node().get_hash()
+            tree.root_hash()
         )
     }
 
@@ -144,7 +139,7 @@ mod tests {
             2,
             "estas",
             proof.expect("Proof is None"),
-            tree.get_root_node().get_hash()
+            tree.root_hash()
         ));
     }
 
@@ -159,7 +154,7 @@ mod tests {
                 3,
                 "estabas",
                 proof.expect("Proof is None"),
-                tree.get_root_node().get_hash()
+                tree.root_hash()
             ),
             false
         );

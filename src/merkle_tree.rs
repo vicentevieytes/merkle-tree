@@ -23,9 +23,8 @@ impl MerkleTree {
         }
     }
 
-    /// Returns the root node of the tree as a MerkleNode struct.
-    pub fn get_root_node(&self) -> &MerkleNode {
-        &self.root
+    pub fn root_hash(&self) -> Hash {
+        self.root.get_hash()
     }
 
     /// Given a value and it's position on the data, returns a cryptographic inclusion proof.
@@ -34,11 +33,7 @@ impl MerkleTree {
             return None;
         } else {
             let tree_height = self.get_tree_height();
-            return Some(Self::merkle_proof(
-                &self.get_root_node(),
-                index,
-                tree_height,
-            ));
+            return Some(Self::merkle_proof(&self.root, index, tree_height));
         }
     }
 
