@@ -1,12 +1,13 @@
 use crate::crypto::hash_combined;
 use crate::crypto::hash_value;
+use crate::crypto::Hash;
 
 /// The `MerkleNode` data structure represents the root of a binary MerkleTree
 /// A `MerkleNode` without any children is called a "leaf".
 /// A `MerkleNode`  is composed of it's hash value and a reference to each of it's children.
 #[derive(Clone, Debug)]
 pub struct MerkleNode {
-    hash: Vec<u8>,
+    hash: Hash,
     left: Option<Box<MerkleNode>>,
     right: Option<Box<MerkleNode>>,
 }
@@ -51,7 +52,7 @@ impl MerkleNode {
     }
 
     /// Returns the hash value of the `MerkleNode`.
-    pub fn get_hash(&self) -> Vec<u8> {
+    pub fn get_hash(&self) -> Hash {
         self.hash.clone()
     }
     /// Returns a reference to the right child node, if it exists.

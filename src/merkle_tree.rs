@@ -1,5 +1,6 @@
 use crate::crypto::hash_combined;
 use crate::crypto::hash_value;
+use crate::crypto::Hash;
 use crate::merkle_node::MerkleNode;
 
 use std::f64;
@@ -28,7 +29,7 @@ impl MerkleTree {
     }
 
     /// Given a value and it's position on the data, returns a cryptographic inclusion proof.
-    pub fn inclusion_proof(&self, index: usize, value: u8) -> Option<Vec<Vec<u8>>> {
+    pub fn inclusion_proof(&self, index: usize, value: u8) -> Option<Vec<Hash>> {
         if self.data.get(index) != Some(&value) {
             return None;
         } else {
@@ -44,7 +45,7 @@ impl MerkleTree {
     /// Recursive helper function to generate the inclusion proof:
     /// The proof that an element is in the tree is the proof that an element is
     /// on one of the sub-trees + the hash of that subtree's sibling.
-    fn merkle_proof(root_node: &MerkleNode, index: usize, tree_height: usize) -> Vec<Vec<u8>> {
+    fn merkle_proof(root_node: &MerkleNode, index: usize, tree_height: usize) -> Vec<Hash> {
         match (root_node.left(), root_node.right()) {
             (Some(left), Some(right)) => {
                 //Each level's size is divided in a power of 2 and the remainder on each level, depending
@@ -95,7 +96,7 @@ impl MerkleTree {
 ///
 /// A boolean value indicating whether the proof is valid. Returns `true` if the proof is valid,
 /// `false` otherwise.
-pub fn verify_proof(index: usize, data: u8, proof: Vec<Vec<u8>>, root_hash: Vec<u8>) -> bool {
+pub fn verify_proof(index: usize, data: u8, proof: Vec<Hash>, root_hash: Hash) -> bool {
     let mut computed_hash = hash_value(&[data]);
     let mut current_index = index;
     for sibling_hash in proof.iter() {
