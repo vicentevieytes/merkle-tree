@@ -1,7 +1,7 @@
 ![license](https://img.shields.io/github/license/vicentevieytes/merkle-tree)
 
-# merkle-tree
-Rust implementation of a Merkle Tree data structure. 
+# Merkle Tree
+Rust library implementing a Merkle Tree data structure. 
 
 A Merkle Tree is a data strucuture which provides efficient integrity verification for some stream of data. The data is divided into N blocks and a cryptographic hash hash_N for each block is computed, these are the "leaves" of tree.
 
@@ -27,6 +27,12 @@ hash\_5 = hash(hash\_3 || hash\_3)
 hash\_6 = hash(hash\_4 || hash\_5) <-- The root of the Merkle Tree
 ```
 
-Given the stream of data, and the root of it's merkle tree, it's easy to verify the integrity of the received data by doing this entire computation. Because the tree is binary, verification takes O(log(n)) steps.
+# Data integrity verification
 
-If the verification fails, that means at least one of the blocks of data is corrupted. To find which one has the defect is also easy and efficient by asking one by one for every individual pair of hashes used to compute every level of the tree that does not match with the hash calculated by the verifier.
+If we receive a data stream from a server, and the root of the Merkle Tree computed from this data, it's easy to verify the data integrity by constructing the tree from the data and comparing the obtained root with the one provieded. To figure out which of the blocks have damaged data, one can ask for the hashes utilized to compute each hash, tracing the ones that don't match you can reach the damaged data blocks.
+
+# Providing data inclusion proofs
+
+Given a value of data and it's position on the data, a Merkle Tree provides a way to proove that this value is in that position.
+
+By following the path from the root to the leaf, and providing the value of the hash of each sibling node utilized through that path, if you trust in the the root value of the tree you can verify the inclusion of the element by reconstructing the root. The proover could only possibly know the value of each pre-image needed to calculate every hash and finally the root hash if that data block is actually a part of the tree.
