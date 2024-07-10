@@ -40,10 +40,6 @@ println!("Your MerkleTree root: {}", hex::encode(merkle_tree.get_root_node().get
 Your MerkleTree root: 4fc38c5af479e7f303421cbd1cf88b6f020dd984068c7945a95d2353789310ab
 ```
 
-# Data integrity verification
-
-If we receive a data stream from a server, and the root of the Merkle Tree computed from this data, it's easy to verify the data integrity by constructing the tree from the data and comparing the obtained root with the one provieded. To figure out which of the blocks have damaged data, one can ask for the hashes utilized to compute each hash, tracing the ones that don't match you can reach the damaged data blocks.
-
 # Providing data inclusion proofs
 
 Given a value of data and it's position on the data, a Merkle Tree provides a way to proove that this value is in that position.
