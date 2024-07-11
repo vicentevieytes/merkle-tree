@@ -22,10 +22,15 @@ impl MerkleTree {
             data: data.iter().map(|item| item.as_ref().to_vec()).collect(),
         }
     }
+    /// Returns the hash value of the root of the Merkle Tree
+    pub fn root_hash(&self) -> Hash {
+        self.root.get_hash()
+    }
 
-    /// Returns the root node of the tree as a MerkleNode struct.
-    pub fn get_root_node(&self) -> &MerkleNode {
-        &self.root
+    /// Returns the height of the tree. Because it's a full binary tree, the height is calculated
+    /// by applying log2 to the ammount of leaves and ceiling the result.
+    pub fn get_tree_height(&self) -> usize {
+        (f64::from(self.data.len() as u32).log2().ceil()) as usize
     }
 
     /// Given a value and it's position on the data, returns a cryptographic inclusion proof.
@@ -34,17 +39,17 @@ impl MerkleTree {
             return None;
         } else {
             let tree_height = self.get_tree_height();
-            return Some(Self::merkle_proof(
-                &self.get_root_node(),
-                index,
-                tree_height,
-            ));
+            return Some(Self::merkle_proof(&self.root, index, tree_height));
         }
     }
 
     /// Recursive helper function to generate the inclusion proof:
     /// The proof that an element is in the tree is the proof that an element is
     /// on one of the sub-trees + the hash of that subtree's sibling.
+    ///
+    /// A Merkle Tree is always a full binary tree by construction, this means that every node has either
+    /// two children or none. Because of this, the path from the root to a leaf can be easily
+    /// found.
     fn merkle_proof(root_node: &MerkleNode, index: usize, tree_height: usize) -> Vec<Hash> {
         match (root_node.left(), root_node.right()) {
             (Some(left), Some(right)) => {
@@ -57,23 +62,18 @@ impl MerkleTree {
                 if index < half_size {
                     let mut proof = Self::merkle_proof(left, index, tree_height - 1);
                     proof.push(right.get_hash());
-                    return proof;
+                    proof
                 } else {
                     let mut proof = Self::merkle_proof(right, index - tree_height, tree_height - 1);
                     proof.push(left.get_hash());
-                    return proof;
+                    proof
                 }
             }
-            _ => {
+            (None, None) => {
                 vec![]
             }
+            _ => unreachable!(),
         }
-    }
-
-    /// Returns the height of the tree. Because it's a full binary tree, the height is calculated
-    /// by applying log2 to the ammount of leaves and ceiling the result.
-    pub fn get_tree_height(&self) -> usize {
-        (f64::from(self.data.len() as u32).log2().ceil()) as usize
     }
 }
 
